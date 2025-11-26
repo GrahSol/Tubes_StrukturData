@@ -19,7 +19,7 @@ Club Brugge
 Real Madrid
 Liverpool
 5 2
-0 4
+4 0
 Napoli
 Frankfurt
 2 0
