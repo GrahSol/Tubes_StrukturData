@@ -19,7 +19,7 @@ Club Brugge
 Real Madrid
 Liverpool
 5 2
-0 1
+0 4
 Napoli
 Frankfurt
 2 0
@@ -32,7 +32,6 @@ Inter Milan
 FC Porto
 1 0
 0 0
-Barcelona
 ```
 
 diagram tree 16 besar hingga final UCL:
