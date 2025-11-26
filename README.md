@@ -35,5 +35,5 @@ FC Porto
 Barcelona
 ```
 
-Link diagram tree:
+diagram tree 16 besar hingga final UCL:
 <img width="998" height="517" alt="image" src="https://github.com/user-attachments/assets/e8441eeb-3174-4c28-90c6-2fb59b8e1413" />
