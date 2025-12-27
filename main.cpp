@@ -1,79 +1,127 @@
 #include <iostream>
-#include <limits>
-#include "tree.h"
+#include "mll.h"
 
 using namespace std;
 
+void menuKelolaData(List &L, string babak) {
+    int pilihan;
+    do {
+        cout<<"\n==============================="<<endl;
+        cout<< "   MENU KELOLA DATA ("<< babak<< ")"<<endl;
+        cout<< "==============================="<<endl;
+        cout<< "1. Tampilkan Data Saat Ini"<<endl;
+        cout<< "2. Lanjut Fase Berikutnya"<<endl;
+        cout<< "3. Ubah Skor "<<endl;
+        cout<< "4. Hapus Pertandingan"<<endl;
+        cout<< "5. Tambah Pertandingan"<<endl;
+        cout<< "6. Keluar"<<endl;
+        cout<< "Pilihan: ";
+        if (!(cin>> pilihan)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(),'\n');
+            pilihan = 0;
+        } else {
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+
+        switch(pilihan) {
+            case 1: tampilkanTurnamen(L); break;
+            case 2: {
+                adrRound r = L.first;
+                while (r != nullptr && r->roundName != babak) {
+                    r = r->next;
+                }
+
+                int jumlah = hitungPertandingan(r);
+                int syarat = 0;
+
+                if (babak == "16 Besar") {
+                    syarat = 8;
+                } else {
+                    if (babak == "8 Besar") {
+                        syarat = 4;
+                    } else {
+                        if (babak == "Semifinal") {
+                            syarat = 2;
+                        } else {
+                            syarat = 1;
+                        }
+                    }
+                }
+
+                if (babak != "FINAL" && jumlah != syarat) {
+                    cout<< "\nGAGAL LANJUT!"<< endl;
+                    cout<< "Jumlah pertandingan di "<< babak<< " saat ini: "<<jumlah<< endl;
+                    cout<< "Syarat untuk lanjut: "<< syarat<< " pertandingan."<< endl;
+                    cout<< "Perhatikann jumlah pertandingan, Silakan Pilih menu yang sesuai terlebih dahulu."<< endl;
+                    pilihan = 0;
+                } else {
+                    cout<<"Lanjut ke Fase Berikut"<< endl;
+                }
+                break;
+            }
+            case 3:
+                ubahSkor(L, babak);
+                break;
+            case 4:
+                hapusPertandingan(L, babak);
+                break;
+            case 5:
+                tambahPertandinganManual(L, babak);
+                break;
+            case 6:
+                cout<< "====== Program Selesai ======="<<endl;
+                exit(0);
+            default: cout<< "Pilihan tidak valid."<< endl;
+        }
+    } while (pilihan != 2);
+}
+
 int main() {
-    adrNode root;
-    createTree(root);
+    List L;
+    createList(L);
+    insertLastRound(L, createNewRound("16 Besar"));
+    insertLastRound(L, createNewRound("8 Besar"));
+    insertLastRound(L, createNewRound("Semifinal"));
+    insertLastRound(L, createNewRound("FINAL"));
+    cout << "=========================================="<<endl;
+    cout << "PROGRAM 16 BESAR HINGAA FINAL TURNAMEN UCL"<<endl;
+    cout << "=========================================="<<endl;
+    cout<<"Masukkan Data Pertandingan!"<<endl;
 
-    // Array untuk menampung 8 node pertandingan 16 besar
-    adrNode match16Besar[8];
-    infotype dataMatch;
 
-    cout << "=============================================" << endl;
-    cout << "   SISTEM TURNAMEN UCL (16 BESAR -> FINAL)   " << endl;
-    cout << "=============================================" << endl;
-
+    adrRound round16 = L.first;
     for (int i = 0; i < 8; i++) {
-        cout << "\n===Pertandingan ke-" << (i + 1) << " (16 Besar)===";
-        dataMatch = inputMatch("16 Besar");
-        match16Besar[i] = createNode(dataMatch);
+        cout<< "\n=== Pertandingan ke-" << (i + 1)<< " (16 Besar) ===";
+        infotype data = inputDataPertandingan("16 Besar");
+        insertLastMatch(round16, createNewMatch(data));
     }
 
+    menuKelolaData(L, "16 Besar");
+    prosesBabakSelanjutnya(L.first);
 
-    infotype blank;
-    blank.babak = "TBD"; blank.timHome="TBD"; blank.timAway="TBD"; blank.isPlayed=false;
+    menuKelolaData(L, "8 Besar");
+    prosesBabakSelanjutnya(L.first->next);
 
-    //Node Quarter Final (4 Node Induk)
-    adrNode qf1 = createNode(blank); qf1->info.babak = "Quarter Final";
-    adrNode qf2 = createNode(blank); qf2->info.babak = "Quarter Final";
-    adrNode qf3 = createNode(blank); qf3->info.babak = "Quarter Final";
-    adrNode qf4 = createNode(blank); qf4->info.babak = "Quarter Final";
+    menuKelolaData(L, "Semifinal");
+    prosesBabakSelanjutnya(L.first->next->next);
 
-    // Hubungkan 16 Besar ke Quarter Final
-    linkNode(qf1, match16Besar[0], match16Besar[1]);
-
-    linkNode(qf2, match16Besar[2], match16Besar[3]);
-
-    linkNode(qf3, match16Besar[4], match16Besar[5]);
-
-    linkNode(qf4, match16Besar[6], match16Besar[7]);
-
-    //  Node Semifinal
-    adrNode sf1 = createNode(blank); sf1->info.babak = "Semifinal";
-    adrNode sf2 = createNode(blank); sf2->info.babak = "Semifinal";
-
-    // Hubungkan QF ke Semifinal
-    linkNode(sf1, qf1, qf2);
-    linkNode(sf2, qf3, qf4);
-
-    // Node Final
-    root = createNode(blank);
-    root->info.babak = "FINAL";
-
-    // Hubungkan SF ke Final
-    linkNode(root, sf1, sf2);
-
-    // PROSES HITUNG PEMENANG (REKURSIF)
-    updateBracket(root);
-
-    // TRAVERSAL
-    cout << "\n=============================================" << endl;
-    cout << "       RIWAYAT PERTANDINGAN (POST-ORDER)     " << endl;
-    cout << "=============================================" << endl;
-    postOrder(root);
-
-    cout << "\n=============================================" << endl;
-    cout << "       STRUKTUR HIERARKI (PRE-ORDER)         " << endl;
-    cout << "=============================================" << endl;
-    preOrder(root);
-
-    cout << "\n=============================================" << endl;
-    cout << "       DAFTAR MATCH (IN-ORDER)               " << endl;
-    cout << "=============================================" << endl;
-    inOrder(root);
+    tampilkanTurnamen(L);
+    adrRound r = L.first;
+    while (r != nullptr) {
+        if (r->roundName == "FINAL") {
+            if (r->firstMatch != nullptr) {
+                cout <<"\n\n==========================================="<<endl;
+                cout <<"           JUARA UCL: " << cariPemenang(r->firstMatch->info)<<endl;
+                cout <<"==========================================="<<endl;
+            } else {
+                cout<<"" ;
+            }
+        } else {
+            cout<<"" ;
+        }
+        r = r->next;
+    }
 
     return 0;
 }
